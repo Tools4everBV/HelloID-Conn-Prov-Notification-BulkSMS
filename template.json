@@ -1,0 +1,43 @@
+[
+    {
+        "key": "scriptFlow",
+        "type": "input",
+        "defaultValue": "SMS",
+        "templateOptions": {
+            "label": "Script flow",
+            "disabled": false
+        },
+        "hide": true
+    },
+    {
+        "key": "time",
+        "type": "input",
+        "defaultValue": "08:00:00",
+        "templateOptions": {
+            "label": "Optional, the scheduled time of the message in format HH:mm:ss",
+            "placeholder": "08:00:00",
+            "required": false,
+            "description": "Please note that agent time is used. The cloud agent always operates in UTC. Any messages scheduled after this time will be sent immediately instead of being delayed."
+        }
+    },
+    {
+        "key": "recipient",
+        "type": "input",
+        "defaultValue": "{{ person.Contact.Personal.Phone.Mobile || \"+31612345678\" }}",
+        "templateOptions": {
+            "label": "Recipient mobile number",
+            "disabled": false
+        }
+    },
+    {
+        "key": "body",
+        "type": "textarea",
+        "defaultValue": "Dear {{person.Name.NickName}}, you can login with username: {{person.accounts.MicrosoftActiveDirectory.AdditionalFields.userPrincipalName}} with password: {{person.accounts.MicrosoftActiveDirectory.Password}}.",
+        "templateOptions": {
+            "label": "Message",
+            "placeholder": "",
+            "required": true,
+            "rows": 5
+        }
+    }
+]

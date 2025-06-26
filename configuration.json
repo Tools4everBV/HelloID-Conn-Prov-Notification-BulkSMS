@@ -1,0 +1,47 @@
+[
+    {
+        "key": "BaseUri",
+        "type": "input",
+        "defaultValue": "https://api.bulksms.com/v1",
+        "templateOptions": {
+            "label": "Base URI",
+            "placeholder": "https://api.bulksms.com/v1",
+            "description": "The BaseURI of the BulkSMS API endpoint(s)",
+            "required": true
+        }
+    },
+    {
+        "key": "tokenID",
+        "type": "input",
+        "defaultValue": "",
+        "templateOptions": {
+            "label": "TokenID",
+            "placeholder": "",
+            "description": "TokenID for the BulkSMS API",
+            "required": true
+        }
+    },
+    {
+        "key": "tokenSecret",
+        "type": "input",
+        "defaultValue": "",
+        "templateOptions": {
+            "label": "TokenSecret",
+            "type": "password",
+            "placeholder": "",
+            "description": "TokenSecret for the BulkSMS API",
+            "required": true
+        }
+    },
+    {
+        "key": "originator",
+        "type": "input",
+        "defaultValue": "",
+        "templateOptions": {
+            "label": "Sending from",
+            "placeholder": "Tools4ever",
+            "description": "The sender of the message. This can be a telephone number (including country code) or an alphanumeric string. In case of an alphanumeric string, the maximum length is 11 characters",
+            "required": true
+        }
+    }
+]
