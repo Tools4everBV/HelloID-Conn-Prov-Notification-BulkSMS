@@ -4,6 +4,14 @@
 # Version: 1.0.0
 #####################################################
 
+# Debug
+if ($actionContext.DryRun -eq $true) {
+    $actionContext.TemplateConfiguration.scriptFlow = 'SMS'
+    $actionContext.TemplateConfiguration.time = "08:00:00"
+    $actionContext.TemplateConfiguration.recipient = '+31612345678'
+    $actionContext.TemplateConfiguration.body = 'Test message'
+}
+
 # Enable TLS1.2
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor [System.Net.SecurityProtocolType]::Tls12
 
@@ -24,7 +32,14 @@ function Resolve-BulkSMSError {
         }
         if (-not [string]::IsNullOrEmpty($ErrorObject.ErrorDetails.Message)) {
             $httpErrorObj.ErrorDetails = $ErrorObject.ErrorDetails.Message
-
+        }
+        elseif ($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException') {
+            if ($null -ne $ErrorObject.Exception.Response) {
+                $streamReaderResponse = [System.IO.StreamReader]::new($ErrorObject.Exception.Response.GetResponseStream()).ReadToEnd()
+                if (-not [string]::IsNullOrEmpty($streamReaderResponse)) {
+                    $httpErrorObj.ErrorDetails = $streamReaderResponse
+                }
+            }
         }
         try {
             $errorDetailsObject = ($httpErrorObj.ErrorDetails | ConvertFrom-Json)
@@ -35,7 +50,6 @@ function Resolve-BulkSMSError {
         catch {
             $httpErrorObj.FriendlyMessage = "Error: [$($httpErrorObj.ErrorDetails)] [$($_.Exception.Message)]"
         }
-
         Write-Output $httpErrorObj
     }
 }
@@ -50,7 +64,6 @@ try {
         $bytes = [System.Text.Encoding]::ASCII.GetBytes("${tokenID}:${tokenSecret}")
         $base64 = [System.Convert]::ToBase64String($bytes)
         $headers.Add("Authorization", "BASIC $base64")
-        # $headers.Add('Accept', 'application/json; charset=utf-8')
         $headers.Add('Content-Type', 'application/json')
 
         $actionMessage = 'creating message body'
@@ -72,12 +85,8 @@ try {
             # Convert DateTime to RFC3339 format (Y-m-d\TH:i:sP)
             $scheduledDatetimeRFC = $scheduledDatetime.ToString("yyyy-MM-dd\THH:mm:sszzz", [System.Globalization.CultureInfo]::InvariantCulture)
 
-            # $currentDate = Get-Date
-            # $time = $actionContext.TemplateConfiguration.time
-            # $dateOnly = $currentDate.Date.ToString("yyyy-MM-dd")
-            # $dateTimeString = "$dateOnly $time"
-            # $scheduledDatetimeRFC = [datetime]::ParseExact($dateTimeString, "yyyy-MM-dd HH:mm:ss", [System.Globalization.CultureInfo]::InvariantCulture)
-            # $scheduledDatetimeRFC = $scheduledDatetime.ToString("yyyy-MM-dd\THH:mm:sszzz", [System.Globalization.CultureInfo]::InvariantCulture)
+            # Escapes a string for use in a URI by encoding special characters (e.g., spaces, symbols) 
+            $scheduledDatetimeRFC = [System.Uri]::EscapeDataString($scheduledDatetimeRFC)
 
             $uri = "$($actionContext.Configuration.baseUri)/messages?auto-unicode=false&schedule-date=$scheduledDatetimeRFC"
             $scheduledTime = $true
@@ -87,19 +96,16 @@ try {
             $scheduledTime = $false
         }
 
-        # $uri = "$($actionContext.Configuration.baseUri)/messages?auto-unicode=false"
         $body = $sendMessageBody | ConvertTo-Json
         $splatParams = @{
             Uri         = $uri
             Headers     = $headers
             Method      = 'POST'
             Body        = ([System.Text.Encoding]::UTF8.GetBytes($body))
-            # Body        = $body
             ErrorAction = "Stop"
         }
 
         $actionMessage = 'sending sms'
-        # $actionContext.DryRun = $false
         if (-not($actionContext.DryRun -eq $true)) {
             $response = Invoke-RestMethod @splatParams
             if ($scheduledTime) {

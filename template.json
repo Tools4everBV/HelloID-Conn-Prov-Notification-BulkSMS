@@ -1,13 +1,13 @@
 [
     {
-        "key": "scriptFlow",
-        "type": "input",
         "defaultValue": "SMS",
+        "hide": false,
+        "key": "scriptFlow",
         "templateOptions": {
-            "label": "Script flow",
-            "disabled": false
+            "disabled": true,
+            "label": "Script flow"
         },
-        "hide": true
+        "type": "input"
     },
     {
         "key": "time",
