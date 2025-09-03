@@ -1,13 +1,13 @@
 #####################################################
 # HelloID-Conn-Prov-Notification-BulkSMS
-#
-# Version: 1.0.0
+# PowerShell Notification System
 #####################################################
 
 # Debug
 if ($actionContext.DryRun -eq $true) {
     $actionContext.TemplateConfiguration.scriptFlow = 'SMS'
-    $actionContext.TemplateConfiguration.time = "08:00:00"
+    $actionContext.TemplateConfiguration.timezone = 'W. Europe Standard Time'
+    $actionContext.TemplateConfiguration.time = '08:00:00'
     $actionContext.TemplateConfiguration.recipient = '+31612345678'
     $actionContext.TemplateConfiguration.body = 'Test message'
 }
@@ -73,21 +73,16 @@ try {
             body = $actionContext.TemplateConfiguration.body
         }
         # Optional, define date and time of the message
-        if (![String]::IsNullOrEmpty($actionContext.TemplateConfiguration.time)) {
-            # Define the date and time
+        if (-NOT[String]::IsNullOrEmpty($actionContext.TemplateConfiguration.time)) {
             $currentDate = Get-date
-            $time = $actionContext.TemplateConfiguration.time
-
-            # Create a DateTime object of current date and specified time
-            $dateTimeString = $currentDate.toString("yyyy-MM-dd") + " $time"
+            if ([String]::IsNullOrEmpty($actionContext.TemplateConfiguration.timezone)) { $actionContext.TemplateConfiguration.timezone = 'UTC' }
+            $timezone = [TimeZoneInfo]::FindSystemTimeZoneById($actionContext.TemplateConfiguration.timezone)
+            $dateTimeString = $currentDate.toString("yyyy-MM-dd") + " $($actionContext.TemplateConfiguration.time)"
             $scheduledDatetime = [datetime]$dateTimeString
-
-            # Convert DateTime to RFC3339 format (Y-m-d\TH:i:sP)
-            $scheduledDatetimeRFC = $scheduledDatetime.ToString("yyyy-MM-dd\THH:mm:sszzz", [System.Globalization.CultureInfo]::InvariantCulture)
-
-            # Escapes a string for use in a URI by encoding special characters (e.g., spaces, symbols) 
+            $scheduledUtcDateTime = [TimeZoneInfo]::ConvertTimeToUtc($scheduledDatetime, $timezone)
+            if ($timezone.SupportsDaylightSavingTime) { $daylightSavingActive = $timezone.IsDaylightSavingTime($scheduledDatetime) } else { $daylightSavingActive = $false }
+            $scheduledDatetimeRFC = $scheduledUtcDateTime.ToString("yyyy-MM-dd\THH:mm:sszzz", [System.Globalization.CultureInfo]::InvariantCulture)
             $scheduledDatetimeRFC = [System.Uri]::EscapeDataString($scheduledDatetimeRFC)
-
             $uri = "$($actionContext.Configuration.baseUri)/messages?auto-unicode=false&schedule-date=$scheduledDatetimeRFC"
             $scheduledTime = $true
         }
@@ -109,7 +104,8 @@ try {
         if (-not($actionContext.DryRun -eq $true)) {
             $response = Invoke-RestMethod @splatParams
             if ($scheduledTime) {
-                $auditMessage = "Successfully scheduled BulkSMS notification [$($response.id)] for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)] at [$scheduledDatetimeRFC]"
+                $auditMessage = "Successfully scheduled BulkSMS notification [$($response.id)] for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)] at [$($scheduledDatetime.ToString("yyyy-MM-dd HH:mm"))]"
+                Write-Information "Selected time zone [$timezone], daylight saving active: [$daylightSavingActive]. SMS will be sent at UTC time [$($scheduledUtcDateTime.ToString("yyyy-MM-dd HH:mm"))], which corresponds to local time [$($scheduledDatetime.ToString("yyyy-MM-dd HH:mm"))]."
             }
             else {
                 $auditMessage = "Successfully sent BulkSMS notification [$($response.id)] for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)]"
@@ -117,7 +113,8 @@ try {
         }
         else {
             if ($scheduledTime) {
-                $auditMessage = "DryRun: Would schedule BulkSMS notification for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)] at [$scheduledDatetimeRFC]"
+                $auditMessage = "DryRun: Would schedule BulkSMS notification for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)] at [$($scheduledDatetime.ToString("yyyy-MM-dd HH:mm"))]"
+                Write-Information "Selected time zone [$timezone], daylight saving active: [$daylightSavingActive]. SMS will be sent at UTC time [$($scheduledUtcDateTime.ToString("yyyy-MM-dd HH:mm"))], which corresponds to local time [$($scheduledDatetime.ToString("yyyy-MM-dd HH:mm"))]."
             }
             else {
                 $auditMessage = "DryRun: Would Send BulkSMS notification for [$($personContext.Person.DisplayName)] to [$($sendMessageBody.to)]"

@@ -60,18 +60,16 @@ To create a form for SMS the following template should be used: [template.json](
 
 The table below describes the different form fields from the template.
 
-| template key            | Description                                                    | Mandatory |
-| ----------------------- | -------------------------------------------------------------- | --------- |
-| scriptFlow              | Fixed value "SMS" (read-only)                                  | Yes       |
-| Time                    | Optional, the scheduled time of the message in format HH:mm:ss | Yes       |
-| Recipient mobile number | Mobile number where SMS should be delivered                    | Yes       |
-| Message                 | Body of the SMS Message                                        | Yes       |
+| template key            | Description                                                                                            | Mandatory |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ | --------- |
+| scriptFlow              | Fixed value "SMS" (read-only)                                                                          | Yes       |
+| Time                    | Optional: scheduled time of the message (HH:mm:ss)                                                     |           |
+| Timezone                | Optional: select a timezone to calculate the correct scheduled message time (includes daylight saving) |           |
+| Recipient mobile number | Mobile number where SMS should be delivered                                                            | Yes       |
+| Message                 | Body of the SMS Message                                                                                | Yes       |
 
 > [!NOTE]
 > When setting a scheduled time, the SMS will be sent at the specified time of day. If the scheduled time has passed, the SMS will be sent immediately.
-> - The time used is based on the current agent time.
-> - For cloud agents, this is in UTC.
-> - To match your local time, use a local agent instead. If the server is configured correctly, this will account for daylight saving time as well.
 
 ## Getting help
 

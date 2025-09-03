@@ -21,6 +21,36 @@
         }
     },
     {
+        "key": "timezone",
+        "type": "select",
+        "templateOptions": {
+            "label": "Optional: select a timezone to calculate the correct scheduled message time (includes daylight saving)",
+            "placeholder": "Please select a timezone",
+            "options": [
+                {
+                    "value": "UTC",
+                    "label": "UTC"
+                },
+                {
+                    "value": "W. Europe Standard Time",
+                    "label": "W. Europe Standard Time (Amsterdam, Berlin, etc.)"
+                },
+                {
+                    "value": "Eastern Standard Time",
+                    "label": "Eastern Standard Time (New York)"
+                },
+                {
+                    "value": "Pacific Standard Time",
+                    "label": "Pacific Standard Time (Los Angeles)"
+                },
+                {
+                    "value": "GMT Standard Time",
+                    "label": "GMT Standard Time (London)"
+                }
+            ]
+        }
+    },
+    {
         "key": "recipient",
         "type": "input",
         "defaultValue": "{{ person.Contact.Personal.Phone.Mobile || \"+31612345678\" }}",
@@ -32,7 +62,7 @@
     {
         "key": "body",
         "type": "textarea",
-        "defaultValue": "Dear {{person.Name.NickName}}, you can login with username: {{person.accounts.MicrosoftActiveDirectory.AdditionalFields.userPrincipalName}} with password: {{person.accounts.MicrosoftActiveDirectory.Password}}.",
+        "defaultValue": "Dear {{person.Name.NickName}}, you can login with password: {{person.accounts.MicrosoftActiveDirectory.Password}}.",
         "templateOptions": {
             "label": "Message",
             "placeholder": "",
