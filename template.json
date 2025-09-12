@@ -1,0 +1,73 @@
+[
+    {
+        "defaultValue": "SMS",
+        "hide": false,
+        "key": "scriptFlow",
+        "templateOptions": {
+            "disabled": true,
+            "label": "Script flow"
+        },
+        "type": "input"
+    },
+    {
+        "key": "time",
+        "type": "input",
+        "defaultValue": "08:00:00",
+        "templateOptions": {
+            "label": "Optional, the scheduled time of the message in format HH:mm:ss",
+            "placeholder": "08:00:00",
+            "required": false,
+            "description": "Please note that agent time is used. The cloud agent always operates in UTC. Any messages scheduled after this time will be sent immediately instead of being delayed."
+        }
+    },
+    {
+        "key": "timezone",
+        "type": "select",
+        "templateOptions": {
+            "label": "Optional: select a timezone to calculate the correct scheduled message time (includes daylight saving)",
+            "placeholder": "Please select a timezone",
+            "options": [
+                {
+                    "value": "UTC",
+                    "label": "UTC"
+                },
+                {
+                    "value": "W. Europe Standard Time",
+                    "label": "W. Europe Standard Time (Amsterdam, Berlin, etc.)"
+                },
+                {
+                    "value": "Eastern Standard Time",
+                    "label": "Eastern Standard Time (New York)"
+                },
+                {
+                    "value": "Pacific Standard Time",
+                    "label": "Pacific Standard Time (Los Angeles)"
+                },
+                {
+                    "value": "GMT Standard Time",
+                    "label": "GMT Standard Time (London)"
+                }
+            ]
+        }
+    },
+    {
+        "key": "recipient",
+        "type": "input",
+        "defaultValue": "{{ person.Contact.Personal.Phone.Mobile || \"+31612345678\" }}",
+        "templateOptions": {
+            "label": "Recipient mobile number",
+            "disabled": false
+        }
+    },
+    {
+        "key": "body",
+        "type": "textarea",
+        "defaultValue": "Dear {{person.Name.NickName}}, you can login with password: {{person.accounts.MicrosoftActiveDirectory.Password}}.",
+        "templateOptions": {
+            "label": "Message",
+            "placeholder": "",
+            "required": true,
+            "rows": 5
+        }
+    }
+]
